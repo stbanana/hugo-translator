@@ -7,7 +7,12 @@ LLM-driven article translator that automatically translates and creates new [nam
 ## 快速使用
 
 1. 从 [Release](https://github.com/Rico00121/hugo-translator/releases)下载该脚本并复制到 hugo 博客的目录下
-2. 在项目根目录下创建一个名为 `.env` 的文件，并添加以下内容：
+
+   添加正确的执行权限：
+   ```
+   chmod +x ./post_translate
+   ```
+3. 在项目根目录下创建一个名为 `.env` 的文件，并添加以下内容：
    ```
    OPENAI_API_KEY=Your OpenAI token
    POST_DIR="content/post/xxx/index.zh.md"
@@ -15,7 +20,7 @@ LLM-driven article translator that automatically translates and creates new [nam
    其中 **OPENAI_API_KEY** 可以根据[官方文档](https://platform.openai.com/docs/quickstart)获取。
 
    **POST_DIR** 是你的文章所在的目录，例如 `content/post/xxx/index.zh.md`。
-3. 调整好合适的 `POST_DIR` 路径之后，在 hugo 目录下直接运行 `post_translate` 即可翻译文章。
+4. 调整好合适的 `POST_DIR` 路径之后，在 hugo 目录下直接运行 `./post_translate` 即可翻译文章。
    
 目前只支持 zh 翻译成 en 文件，欢迎贡献你的代码👏
 
