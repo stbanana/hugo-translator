@@ -84,3 +84,15 @@ LLM-driven article translator that automatically translates and creates new [nam
    python post_translate.py
    ```
 
+## 常见问题
+
+- macOS 下运行碰见报错：
+
+  > "post_translate" Not Opened Apple could not verify "post_translate" is free of malware that may harm your Mac or compromise your privacy.
+
+  解决方法：打开终端，导航到文件所在目录，使用以下命令绕过 Gatekeeper：
+
+  ```bash
+  xattr -d com.apple.quarantine post_translate
+  ```
+
