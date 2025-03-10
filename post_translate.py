@@ -4,9 +4,35 @@ import frontmatter
 import sys
 from dotenv import load_dotenv
 
+
+def convert_zh_to_en_path(file_path):
+    # 规范化路径并分割
+    normalized_path = os.path.normpath(file_path)
+    dir_path, filename = os.path.split(normalized_path)
+
+    # 递归分割目录部分
+    dir_parts = []
+    while True:
+        dir_path, part = os.path.split(dir_path)
+        if not part:
+            break
+        dir_parts.append(part)
+    dir_parts = dir_parts[::-1]  # 反转恢复顺序
+
+    # 查找并替换 "zh_hans"
+    try:
+        zh_index = dir_parts.index("zh_hans")
+        dir_parts[zh_index] = "en"
+    except ValueError:
+        return None
+
+    # 重组路径
+    new_dir = os.path.join(*dir_parts)
+    return os.path.join(new_dir, filename)
+
 def get_translation(llm_type, messages):
     """Call LLM and get translation results"""
-    model = "gpt-4o" if llm_type == "openai" else "deepseek-chat"
+    model = "gpt-4o-mini" if llm_type == "openai" else "deepseek-chat"
     response = client.chat.completions.create(
         model=model,
         messages=messages
@@ -56,16 +82,18 @@ def process_hugo_post(file_path, llm_type):
 
     # Create English version
     new_metadata = post.metadata
-    new_metadata["title"] = translate_title(new_metadata["title"], llm_type)
-    if "summary" in new_metadata:
-        new_metadata["summary"] = translate_sumary(new_metadata["summary"], llm_type)
+    # new_metadata["title"] = translate_title(new_metadata["title"], llm_type)
+    # if "summary" in new_metadata:
+    #     new_metadata["summary"] = translate_sumary(new_metadata["summary"], llm_type)
 
     # Extract main text and translate
     translated_content = translate_text(post.content, llm_type)
 
     # Generate Hugo English version file
     new_post = frontmatter.Post(translated_content, **new_metadata)
-    en_file_path = file_path.replace(".zh.md", ".en.md")
+    en_file_path = convert_zh_to_en_path(file_path)
+
+    os.makedirs(os.path.dirname(en_file_path), exist_ok=True)
 
     with open(en_file_path, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(new_post,sort_keys=False))
@@ -92,7 +120,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Check if the post file has the correct extension
-    if not post_path.endswith(".zh.md"):
+    if not post_path.endswith(".md"):
         print(f"Error: Post file should have .zh.md extension: {post_path}")
         sys.exit(1)
 
@@ -112,6 +140,7 @@ if __name__ == "__main__":
     if llm_type == "openai":
         client = openai.OpenAI(
             api_key=os.getenv("OPENAI_API_KEY"),
+            base_url="https://api.chatanywhere.tech/v1",
         )
         print("Using OpenAI for translation...")
     else:  # deepseek
